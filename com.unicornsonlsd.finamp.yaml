@@ -270,15 +270,15 @@ modules:
                 sources:
                   - type: git
                     url: https://github.com/google/shaderc.git
-                    tag: v2024.1
-                    commit: 47a9387ef5b3600d30d84c71ec77a59dc7db46fa
+                    tag: v2024.3
+                    commit: ff84893dd52d28f0b1737d2635733d952013bd9c
                     x-checker-data:
                       type: git
                       tag-pattern: ^v(\d{4}\.\d{1,2})$
                   - type: git
                     url: https://github.com/KhronosGroup/SPIRV-Tools.git
-                    tag: v2024.1
-                    commit: 04896c462d9f3f504c99a4698605b6524af813c1
+                    tag: v2024.3
+                    commit: 0cfe9e7219148716dfd30b37f4d21753f098707a
                     dest: third_party/spirv-tools
                     x-checker-data:
                       type: git
@@ -290,8 +290,8 @@ modules:
                     dest: third_party/spirv-headers
                   - type: git
                     url: https://github.com/KhronosGroup/glslang.git
-                    tag: 14.2.0
-                    commit: e8dd0b6903b34f1879520b444634c75ea2deedf5
+                    tag: 14.3.0
+                    commit: fa9c3deb49e035a8abcabe366f26aac010f6cbfb
                     dest: third_party/glslang
                     x-checker-data:
                       type: git
