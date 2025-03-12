@@ -67,7 +67,7 @@ modules:
         modules:
 
           - name: luajit
-            no-autogen: true
+            buildsystem: cmake-ninja
             cleanup:
               - /bin
               - '*.a'
@@ -75,9 +75,10 @@ modules:
               - /lib/pkgconfig
               - /share/man
             sources:
-              - type: archive
-                url: http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
-                sha256: 1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3
+              - type: git
+                url: https://luajit.org/git/luajit.git
+                tag: v2.1.ROLLING
+                sha256: 538a82133ad6fddfd0ca64de167c4aca3bc1a2da
               - type: shell
                 commands:
                   - sed -i 's|/usr/local|/app|' ./Makefile
