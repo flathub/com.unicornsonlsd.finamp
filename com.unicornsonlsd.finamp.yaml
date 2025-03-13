@@ -67,21 +67,15 @@ modules:
         modules:
 
           - name: luajit
-            buildsystem: cmake-ninja
-            cleanup:
-              - /bin
-              - '*.a'
-              - /include
-              - /lib/pkgconfig
-              - /share/man
+            buildsystem: simple
+            build-commands:
+              - make -j $FLATPAK_BUILDER_N_JOBS
+              - make PREFIX=/app install
             sources:
               - type: git
-                url: https://luajit.org/git/luajit.git
+                url: https://github.com/LuaJIT/LuaJIT.git
                 tag: v2.1.ROLLING
-                sha256: 538a82133ad6fddfd0ca64de167c4aca3bc1a2da
-              - type: shell
-                commands:
-                  - sed -i 's|/usr/local|/app|' ./Makefile
+                commit: 2090842410e0ba6f81fad310a77bf5432488249a
 
           - name: libv4l2
             buildsystem: meson
