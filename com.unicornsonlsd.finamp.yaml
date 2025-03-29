@@ -38,7 +38,7 @@ modules:
         only-arches:
           - x86_64
         url: https://github.com/jmshrv/finamp/releases/download/0.9.15-beta/finamp-0.9.15-beta-linux-release.tar.gz
-        sha256: b099ad4ef815a8811fb976bfcbbab04b5cdcf34d8c924b25290ada8a001e4e7d
+        sha256: e4ad17e670d6687ce7703dcb5af0457fb3af5a3f12e073e97df296294b880aed
         strip-components: 0
       - type: file
         url: https://raw.githubusercontent.com/jmshrv/finamp/dac612650747e832e28690eb639faaff02f242c5/assets/icon/icon_foreground_square.svg
