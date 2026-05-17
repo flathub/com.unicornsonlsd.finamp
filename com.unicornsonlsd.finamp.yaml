@@ -1,6 +1,6 @@
 app-id: com.unicornsonlsd.finamp
 runtime: org.freedesktop.Platform
-runtime-version: '24.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 command: finamp
 finish-args:
@@ -11,6 +11,15 @@ finish-args:
   - --socket=pulseaudio
   - --filesystem=xdg-run/pipewire-0:ro
   - --share=network
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - '*.la'
+  - '*.a'
+
 modules:
   - name: finamp
     buildsystem: simple
@@ -19,21 +28,18 @@ modules:
       - chmod +x /app/finamp
       - mkdir -p /app/bin
       - ln -s /app/finamp /app/bin/finamp
-      - install -Dm644 icons/16x16/apps/finamp.png /app/share/icons/hicolor/16x16/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/32x32/apps/finamp.png /app/share/icons/hicolor/32x32/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/48x48/apps/finamp.png /app/share/icons/hicolor/48x48/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/64x64/apps/finamp.png /app/share/icons/hicolor/64x64/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/128x128/apps/finamp.png /app/share/icons/hicolor/128x128/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/256x256/apps/finamp.png /app/share/icons/hicolor/256x256/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/384x384/apps/finamp.png /app/share/icons/hicolor/384x384/apps/com.unicornsonlsd.finamp.png
-      - install -Dm644 icons/512x512/apps/finamp.png /app/share/icons/hicolor/512x512/apps/com.unicornsonlsd.finamp.png
       - install -Dm644 icon_foreground_square.svg /app/share/icons/hicolor/scalable/apps/com.unicornsonlsd.finamp.svg
       - m4 finamp.desktop.m4 > com.unicornsonlsd.finamp.desktop
-      - desktop-file-edit com.unicornsonlsd.finamp.desktop --set-key=Exec --set-value=finamp
-        --set-icon=com.unicornsonlsd.finamp
-      - install -Dm644 com.unicornsonlsd.finamp.desktop /app/share/applications/com.unicornsonlsd.finamp.desktop
-      - install -Dm644 com.unicornsonlsd.finamp.metainfo.xml /app/share/appdata/com.unicornsonlsd.finamp.metainfo.xml
+      - desktop-file-edit --set-key=Exec --set-value=finamp com.unicornsonlsd.finamp.desktop
+      - desktop-file-edit --set-icon=com.unicornsonlsd.finamp com.unicornsonlsd.finamp.desktop
+      - install -Dm644 com.unicornsonlsd.finamp.desktop -t /app/share/applications/
+      - install -Dm644 com.unicornsonlsd.finamp.metainfo.xml -t /app/share/metainfo/
     sources:
+      # Fix missing license file
+      - type: file
+        url: https://raw.githubusercontent.com/UnicornsOnLSD/finamp/20c2c15448415633385720b840ce6c86609cfb05/LICENSE
+        sha256: 1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5
+
       - type: archive
         only-arches:
           - x86_64
@@ -52,45 +58,32 @@ modules:
     modules:
 
       - name: libmpv
-        cleanup:
-          - /include
-          - /lib/pkgconfig
-          - /share/applications
-          - /share/bash-completion
-          - /share/doc
-          - /share/icons
-          - /share/man
-          - /share/zsh
         buildsystem: meson
         config-opts:
           - -Dlibmpv=true
           - -Dbuild-date=false
           - -Dalsa=disabled
+          - -Dmanpage-build=disabled
+        cleanup:
+          - /share/applications
+          - /share/bash-completion
+          - /share/fish
+          - /share/icons
+          - /share/zsh
         sources:
           - type: archive
-            url: https://github.com/mpv-player/mpv/archive/v0.38.0.tar.gz
-            sha256: 86d9ef40b6058732f67b46d0bbda24a074fae860b3eaae05bab3145041303066
+            url: https://github.com/mpv-player/mpv/archive/v0.41.0.tar.gz
+            sha256: ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209
         modules:
+          # Use luajit module from the shared-modules
+          - shared-modules/luajit/luajit.json
 
-          - name: luajit
-            buildsystem: simple
-            build-commands:
-              - make -j $FLATPAK_BUILDER_N_JOBS
-              - make PREFIX=/app install
-            sources:
-              - type: git
-                url: https://github.com/LuaJIT/LuaJIT.git
-                tag: v2.1.ROLLING
-                commit: 2090842410e0ba6f81fad310a77bf5432488249a
-
+          # NOTE: The libdav1d module might be the only blocker to using the FFMPEG module from the runtime
           - name: libv4l2
             buildsystem: meson
             cleanup:
               - /sbin
               - /bin
-              - /include
-              - /lib/pkgconfig
-              - /share/man
             config-opts:
               - -Dbpf=disabled
               - -Dudevdir=/app/lib/udev
@@ -100,21 +93,9 @@ modules:
                 url: https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.26.1.tar.xz
                 sha256: 4a71608c0ef7df2931176989e6d32b445c0bdc1030a2376d929c8ca6e550ec4e
 
-          - name: nv-codec-headers
-            cleanup:
-              - '*'
-            no-autogen: true
-            make-install-args:
-              - PREFIX=/app
-            sources:
-              - type: archive
-                url: https://github.com/FFmpeg/nv-codec-headers/archive/refs/tags/n12.2.72.0.tar.gz
-                sha256: dbeaec433d93b850714760282f1d0992b1254fc3b5a6cb7d76fc1340a1e47563
-
+          # NOTE: The libdav1d module might be the only blocker to using the FFMPEG module from the runtime
           - name: ffmpeg
             cleanup:
-              - /include
-              - /lib/pkgconfig
               - /share/ffmpeg/examples
             config-opts:
               - --enable-shared
@@ -136,29 +117,20 @@ modules:
                 sha256: bce9eeb0f17ef8982390b1f37711a61b4290dc8c2a0c1a37b5857e85bfb0e4ff
 
           - name: libass
-            cleanup:
-              - /include
-              - '*.la'
-              - '*.a'
-              - /lib/pkgconfig
             config-opts:
               - --disable-static
             sources:
               - type: archive
-                url: https://github.com/libass/libass/releases/download/0.17.2/libass-0.17.2.tar.xz
-                sha256: e8261b51d66ba933fe99248c6fdd8767ed96c5a7e5363c83992c735a2c2fbf74
+                url: https://github.com/libass/libass/releases/download/0.17.4/libass-0.17.4.tar.gz
+                sha256: a886b3b80867f437bc55cff3280a652bfa0d37b43d2aff39ddf3c4f288b8c5a8
 
           - name: uchardet
             buildsystem: cmake-ninja
             config-opts:
               - -DCMAKE_BUILD_TYPE=Release
               - -DBUILD_STATIC=0
-            cleanup:
-              - /bin
-              - /include
-              - /lib/pkgconfig
-              - /share/man
-              - /lib/cmake
+              - -DBUILD_BINARY=OFF
+              - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             sources:
               - type: archive
                 url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz
@@ -170,8 +142,6 @@ modules:
               - -Ddefault_library=shared
             cleanup:
               - /bin
-              - /include
-              - /lib/pkgconfig
               - /lib/ladspa
             sources:
               - type: archive
@@ -181,9 +151,6 @@ modules:
           - name: mujs
             cleanup:
               - /bin
-              - /include
-              - /lib/pkgconfig
-              - '*.a'
             no-autogen: true
             make-args:
               - release
@@ -200,57 +167,11 @@ modules:
             buildsystem: meson
             config-opts:
               - -Dvulkan=enabled
-              - -Dshaderc=enabled
-            cleanup:
-              - /include
-              - /lib/pkgconfig
+              - -Dshaderc=enabled # Use sharedc module from the runtime
+              - -Ddemos=false
             sources:
               - type: git
                 url: https://github.com/haasn/libplacebo
-                commit: c320f61e601caef2be081ce61138e5d51c1be21d
-            modules:
-              - name: shaderc
-                buildsystem: cmake-ninja
-                builddir: true
-                config-opts:
-                  - -DSHADERC_SKIP_COPYRIGHT_CHECK=ON
-                  - -DSHADERC_SKIP_EXAMPLES=ON
-                  - -DSHADERC_SKIP_TESTS=ON
-                  - -DSPIRV_SKIP_EXECUTABLES=ON
-                  - -DENABLE_GLSLANG_BINARIES=OFF
-                cleanup:
-                  - /bin
-                  - /include
-                  - /lib/cmake
-                  - '*.a'
-                  - /lib/pkgconfig
-                sources:
-                  - type: git
-                    url: https://github.com/google/shaderc.git
-                    tag: v2024.1
-                    commit: 47a9387ef5b3600d30d84c71ec77a59dc7db46fa
-                    x-checker-data:
-                      type: git
-                      tag-pattern: ^v(\d{4}\.\d{1,2})$
-                  - type: git
-                    url: https://github.com/KhronosGroup/SPIRV-Tools.git
-                    tag: v2024.1
-                    commit: 04896c462d9f3f504c99a4698605b6524af813c1
-                    dest: third_party/spirv-tools
-                    x-checker-data:
-                      type: git
-                      tag-pattern: ^v(\d{4}\.\d{1})$
-                  - type: git
-                    url: https://github.com/KhronosGroup/SPIRV-Headers.git
-                    tag: vulkan-sdk-1.3.283.0
-                    commit: 4f7b471f1a66b6d06462cd4ba57628cc0cd087d7
-                    dest: third_party/spirv-headers
-                  - type: git
-                    url: https://github.com/KhronosGroup/glslang.git
-                    tag: 14.2.0
-                    commit: e8dd0b6903b34f1879520b444634c75ea2deedf5
-                    dest: third_party/glslang
-                    x-checker-data:
-                      type: git
-                      tag-pattern: ^(\d{1,2}\.\d{1,2}\.\d{1,4})$
+                tag: v7.360.1
+                commit: cee9b076f2c63104ccfd497fa79c39a867293ec4
 
