@@ -45,13 +45,13 @@ modules:
         only-arches:
           - x86_64
         url: https://github.com/UnicornsOnLSD/finamp/releases/download/0.9.25-beta/finamp-0.9.25-beta-linux-x64.tar.gz
-        sha256: ba452dd8c35e04a209799352f8cb1b117ce9952f29ce3cb37cfd4babd7ba2cde
+        sha256: 87d1f6f3ac9d411ce0e63537c6422e932c1f00bca7cc91f7dcfae64ec01f6d5b
         strip-components: 0
       - type: archive
         only-arches:
           - aarch64
         url: https://github.com/UnicornsOnLSD/finamp/releases/download/0.9.25-beta/finamp-0.9.25-beta-linux-arm64.tar.gz
-        sha256: d0bb35fad241616af234bb56b65ab9ccd02de076ec647231732dee4f9969ccd5
+        sha256: 22be370e7cc1c445f27bf9a91a759013053ce445ac11abc4ecd5bd052a5a1d1c
         strip-components: 0
       - type: file
         url: https://raw.githubusercontent.com/jmshrv/finamp/dac612650747e832e28690eb639faaff02f242c5/assets/icon/icon_foreground_square.svg
